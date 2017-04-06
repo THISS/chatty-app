@@ -23,41 +23,37 @@ class App extends Component {
       ]
     };
   }
-  // Keeping the console logs to show thought process
-  handleKeyup (e) {
-    console.log(e.target.value);
 
+  handleKeyup (e) {
     if (e.which === 13) {
       const name = this.state.currentUser.name;
       const message = e.target.value;
       // Reset the value
       e.target.value = "";
-      // console.log(name.value);
-      // console.log(message.value);
+
       const newMessage = {
         username: name,
         content: message
       };
-      // console.log(newMessage);
-      // console.log(this.state);
+
       const messages = this.state.messages.concat(newMessage);
-      // console.log({messages});
+
       this.setState({messages});
     }
   }
 
   componentDidMount() {
-    // console.log("simulating an incoming message");
+
     setTimeout(() => {
       const newMessage = {username: "Jeff", content: "Wanna go get some food"};
       const messages = this.state.messages.concat(newMessage);
-      // using es6 with same name
+
       this.setState({messages});
     }, 4000);
   }
 
   render() {
-    // console.log("App component");
+
     return (
       <div>
         <nav className="navbar">
@@ -69,6 +65,7 @@ class App extends Component {
     );
   }
 }
+
 export default App;
 
 

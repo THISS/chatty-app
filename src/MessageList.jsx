@@ -20,14 +20,13 @@ class MessageList extends Component {
       return messages.map((message, index) => {
         return <Message key={index} username={message.username} content={message.content}/>;
       });
-    }else {
-      return [];
+      
     }
   }
 
 
   render() {
-    // console.log("MessageList component");
+
 
     const messages = this.renderMessages(this.props.messages);
 
