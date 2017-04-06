@@ -25,7 +25,7 @@ class App extends Component {
   }
 
   handleKeyup (e) {
-    if (e.which === 13) {
+    if (e.which === 13 && e.target.value) {
       const name = this.state.currentUser.name;
       const message = e.target.value;
       // Reset the value
