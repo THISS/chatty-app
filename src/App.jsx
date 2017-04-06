@@ -24,6 +24,22 @@ class App extends Component {
     };
   }
 
+  broadcastMessage (e) {
+    console.log(e);
+    // const newMessage = 1;
+    // this.setState(messages);
+  }
+
+  componentDidMount() {
+    console.log("simulating an incoming message");
+    setTimeout(() => {
+      const newMessage = {username: "Jeff", content: "Wanna go get some food"};
+      const messages = this.state.messages.concat(newMessage);
+      // using es6 with same name
+      this.setState({messages});
+    }, 4000);
+  }
+
   render() {
     console.log("App component");
     return (
