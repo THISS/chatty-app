@@ -27,7 +27,7 @@ class MessageList extends Component {
 
 
   render() {
-    console.log("MessageList component");
+    // console.log("MessageList component");
 
     const messages = this.renderMessages(this.props.messages);
 
