@@ -7,24 +7,12 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: {name: "Brenton"},
-      messages: [
-        {
-          username: "Brenton", 
-          content: "Has anyone seen my marbles?"
-        },
-        {
-          username: "Anonymous",
-          content: "No, I think you lost them. You lost your marbles Brenton. You lost them for good."
-        },
-        {
-          username: "Anonymous",
-          content: "Why won't you talk to me now?..."
-        }
-      ]
+      messages: [],
+      notifications: {oldName: "Anonymous", newName: "Brenton"}
     };
   }
 
-  handleKeyup (e) {
+  handleSendMessage (e) {
     if (e.which === 13 && e.target.value) {
       const name = this.state.currentUser.name;
       const message = e.target.value;
@@ -32,24 +20,64 @@ class App extends Component {
       e.target.value = "";
 
       const newMessage = {
+        type: "postMessage",
         username: name,
         content: message
       };
 
-      const messages = this.state.messages.concat(newMessage);
+      // const messages = this.state.messages.concat(newMessage);
 
-      this.setState({messages});
+      // this.setState({messages});
+      this.state.websocket.send(JSON.stringify(newMessage));
     }
   }
 
-  componentDidMount() {
+  handleUpdateUsername (e) {
+    if (e.which === 13) {
+      const newUsername = (e.target.value) ? e.target.value : "Anonymous";
+      const oldUsername = this.state.currentUser.name;
+      // Set the current user name
+      this.setState( {currentUser: {name: newUsername}} );
+      const updateObj = {
+        type: "postNotification",
+        oldName: oldUsername,
+        newName: newUsername
+      };
+      // notify all
+      this.state.websocket.send(JSON.stringify(updateObj));
+    }
+  }
 
-    setTimeout(() => {
-      const newMessage = {username: "Jeff", content: "Wanna go get some food"};
-      const messages = this.state.messages.concat(newMessage);
+  usernameNotification (usernameChange) {
+    this.setState( {notifications: {oldName: usernameChange.oldName, newName: usernameChange.newName}} );
+  }
 
-      this.setState({messages});
-    }, 4000);
+  messageNotification (messageChange) {
+    this.setState( {messages: this.state.messages.concat(messageChange)} );
+  }
+
+  componentDidMount () {
+    const websocket = new WebSocket("ws://localhost:3001");
+
+    websocket.onopen = (ws) => {
+      console.log("Opened Connection");
+      this.setState({ websocket });
+    };
+
+    websocket.onmessage = (message) => {
+      const messageObj = JSON.parse(message.data);
+      switch(messageObj.type) {
+      case "incomingMessage":
+        this.messageNotification(messageObj);
+        break;
+      case "incomingNotification":
+        this.usernameNotification(messageObj);
+        break;
+      default:
+        // show an error in the console if the message type is unknown
+        throw new Error("Unknown event type " + messageObj.type);
+      }
+    };
   }
 
   render() {
@@ -59,8 +87,10 @@ class App extends Component {
         <nav className="navbar">
             <a href="/" className="navbar-brand">Chatty</a>
         </nav>
-        <MessageList messages={this.state.messages} />
-        <ChatBar keyupHandler={this.handleKeyup.bind(this)} currentUser={this.state.currentUser} />
+        <MessageList messages={this.state.messages} notifications={this.state.notifications} />
+        <ChatBar sendMessageHandler={this.handleSendMessage.bind(this)}
+        updateUsernameHandler={this.handleUpdateUsername.bind(this)}
+        currentUser={this.state.currentUser} />
       </div>
     );
   }

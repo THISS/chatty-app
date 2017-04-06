@@ -33,11 +33,12 @@ class MessageList extends Component {
     return (
       <main className="messages">
 
+        <div className="message system">
+          {this.props.notifications.oldName} changed their name to {this.props.notifications.newName}
+        </div>
+        
         {messages}
 
-        <div className="message system">
-          Anonymous1 changed their name to {this.state.name}
-        </div>
       </main>
     );
   }
