@@ -7,6 +7,11 @@ const uuid = require('uuid/v1');
 function checkImgUrl(content) {
   return (content.includes(".jpg") || content.includes(".png") || content.includes(".gif"));
 }
+
+function broadcastUserCount() {
+  wss.broadcast( {type: "userCount", numUsers: wss.clients.size} );
+}
+
 // Set the port to 3001
 const PORT = 3001;
 
@@ -28,38 +33,45 @@ wss.on('connection', (ws) => {
   // set the users color between 0 and 3
   const colorNum = userId % 4;
   userId++;
-  wss.broadcast( {type: "userCount", numUsers: wss.clients.size} );
+  broadcastUserCount();
+
   ws.onmessage = (message) => {
     const messageObj = JSON.parse(message.data);
+    const broadcastObj = {};
     console.log( `User ${messageObj.username} said ${messageObj.content}`);
-    messageObj.id = uuid();
-    messageObj.colorNum = colorNum;
+    broadcastObj.id = uuid();
+    broadcastObj.colorNum = colorNum;
     if(messageObj.type === "postMessage") {
-      messageObj.type = "incomingMessage";
+      broadcastObj.username = messageObj.username;
+      broadcastObj.type = "incomingMessage";
       if (checkImgUrl(messageObj.content)) {
-        messageObj.img = messageObj.content;
-        messageObj.content = "";
+        broadcastObj.img = messageObj.content;
+      }else {
+        broadcastObj.content = messageObj.content;
       }
     }
     if(messageObj.type === "postNotification") {
-      messageObj.type = "incomingNotification";
+      broadcastObj.type = "incomingNotification";
+      broadcastObj.oldName = messageObj.oldName;
+      broadcastObj.newName = messageObj.newName;
     }
 
-    wss.broadcast(messageObj);
+    wss.broadcast(broadcastObj);
   };
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
     console.log('Client disconnected');
-    wss.broadcast( {type: "userCount", numUsers: wss.clients.size} );
+    broadcastUserCount();
   });
 
 });
 
 // Broadcast to all.
 wss.broadcast = (data) => {
+  const stringdUp = JSON.stringify(data);
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
+      client.send(stringdUp);
     }
   });
 };

@@ -25,8 +25,7 @@ class App extends Component {
         username: name,
         content: message
       };
-      this.state.websocket.send(JSON.stringify(newMessage));
-
+      this.websocket.send(JSON.stringify(newMessage));
     }
   }
 
@@ -42,7 +41,7 @@ class App extends Component {
         newName: newUsername
       };
       // notify all
-      this.state.websocket.send(JSON.stringify(updateObj));
+      this.websocket.send(JSON.stringify(updateObj));
     }
   }
 
@@ -54,30 +53,28 @@ class App extends Component {
     this.setState( {messages: this.state.messages.concat(messageChange)} );
   }
 
-  componentDidMount () {
-    const websocket = new WebSocket("ws://localhost:3001");
+  setUserCount (countChange) {
+    this.setState( {numUsers: countChange.numUsers} );
+  }
 
-    websocket.onopen = (ws) => {
+  componentDidMount () {
+    this.websocket = new WebSocket("ws://localhost:3001");
+
+    this.websocket.onopen = (ws) => {
       console.log("Opened Connection");
-      this.setState({ websocket });
     };
 
-    websocket.onmessage = (message) => {
+    this.websocket.onmessage = (message) => {
       const messageObj = JSON.parse(message.data);
-      switch(messageObj.type) {
-      case "incomingMessage":
-        this.messageNotification(messageObj);
-        break;
-      case "incomingNotification":
-        this.usernameNotification(messageObj);
-        break;
-      case "userCount":
-        this.setState({numUsers: messageObj.numUsers});
-        break;
-      default:
-        // show an error in the console if the message type is unknown
-        throw new Error("Unknown event type " + messageObj.type);
-      }
+
+      const incomingMessageTypeHandler = {
+        incomingMessage: this.messageNotification,
+        incomingNotification: this.usernameNotification,
+        userCount: this.setUserCount
+      };
+
+      if (!incomingMessageTypeHandler[messageObj.type]) { throw new Error("Unknown event type " + messageObj.type); }
+      incomingMessageTypeHandler[messageObj.type].call(this, messageObj);
     };
   }
 
