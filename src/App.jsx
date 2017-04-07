@@ -6,9 +6,10 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentUser: {name: "Brenton"},
+      currentUser: {name: "Anonymous"},
       messages: [],
-      notifications: {oldName: "Anonymous", newName: "Brenton"}
+      numUsers: 0,
+      notifications: {oldName: "Anonymous", newName: "Anonymous"}
     };
   }
 
@@ -24,11 +25,8 @@ class App extends Component {
         username: name,
         content: message
       };
-
-      // const messages = this.state.messages.concat(newMessage);
-
-      // this.setState({messages});
       this.state.websocket.send(JSON.stringify(newMessage));
+
     }
   }
 
@@ -73,6 +71,9 @@ class App extends Component {
       case "incomingNotification":
         this.usernameNotification(messageObj);
         break;
+      case "userCount":
+        this.setState({numUsers: messageObj.numUsers});
+        break;
       default:
         // show an error in the console if the message type is unknown
         throw new Error("Unknown event type " + messageObj.type);
@@ -86,6 +87,9 @@ class App extends Component {
       <div>
         <nav className="navbar">
             <a href="/" className="navbar-brand">Chatty</a>
+            <div>
+              {this.state.numUsers} Users Online
+            </div>
         </nav>
         <MessageList messages={this.state.messages} notifications={this.state.notifications} />
         <ChatBar sendMessageHandler={this.handleSendMessage.bind(this)}

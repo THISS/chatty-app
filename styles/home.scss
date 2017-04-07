@@ -59,6 +59,10 @@ body {
 .message-content {
   flex: 8;
 }
+  
+img {
+  max-width: 60%;
+}
 
 .message-username {
   flex: 2;
@@ -74,6 +78,11 @@ body {
   position: fixed;
   right: 0;
   top: 0;
+
+  div {
+    float: right;
+    margin: 2em;
+  }
 }
 
 .navbar-brand {

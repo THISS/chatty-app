@@ -2,23 +2,28 @@ import React, {Component} from 'react';
 import Message from './Message.jsx';
 
 class MessageList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: "Brenton"
-    };
-  }
-
-  componentDidMount() {
-    setTimeout(() => {
-      this.setState({name: "Lighthouse"});
-    }, 3000);
-  }
-
   renderMessages(messages) {
     if (messages.length) {
-      return messages.map((message, index) => {
-        return <Message key={index} username={message.username} content={message.content}/>;
+      return messages.map((message) => {
+        let color = "#ccc";
+
+        switch(message.colorNum) {
+          case 0:
+            color = "tomato";
+            break;
+          case 1:
+            color = "blue";
+            break;
+          case 2:
+            color = "red";
+            break;
+          case 3:
+            color = "green";
+            break;
+        }
+        return <Message key={message.id} color={color} 
+        username={message.username} content={message.content} 
+        img={message.img}/>;
       });
       
     }
