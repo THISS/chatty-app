@@ -10,7 +10,7 @@ new WebpackDevServer(webpack(config), {
     poll: 2000
   }
 })
-.listen(3000, '0.0.0.0', function (err, result) {
+.listen(3000, '0.0.0.0',  (err, result) =>{
   if (err) {
     console.log(err);
   }

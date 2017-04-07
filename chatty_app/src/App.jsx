@@ -82,7 +82,7 @@ class App extends Component {
   }
 
   render() {
-
+        
     return (
       <div>
         <nav className="navbar">
