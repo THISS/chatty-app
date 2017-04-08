@@ -8,45 +8,38 @@ class App extends Component {
     this.state = {
       currentUser: {name: "Anonymous"},
       messages: [],
-      numUsers: 0,
-      notifications: {oldName: "Anonymous", newName: "Anonymous"}
+      numUsers: 0
     };
   }
 
-  handleSendMessage (e) {
-    if (e.which === 13 && e.target.value) {
-      const name = this.state.currentUser.name;
-      const message = e.target.value;
-      // Reset the value
-      e.target.value = "";
+  handleSendMessage (value) {
+    const name = this.state.currentUser.name;
+    const message = value;
 
-      const newMessage = {
-        type: "postMessage",
-        username: name,
-        content: message
-      };
-      this.websocket.send(JSON.stringify(newMessage));
-    }
+    const newMessage = {
+      type: "postMessage",
+      username: name,
+      content: message
+    };
+    this.websocket.send(JSON.stringify(newMessage));
   }
 
-  handleUpdateUsername (e) {
-    if (e.which === 13) {
-      const newUsername = (e.target.value) ? e.target.value : "Anonymous";
-      const oldUsername = this.state.currentUser.name;
-      // Set the current user name
-      this.setState( {currentUser: {name: newUsername}} );
-      const updateObj = {
-        type: "postNotification",
-        oldName: oldUsername,
-        newName: newUsername
-      };
-      // notify all
-      this.websocket.send(JSON.stringify(updateObj));
-    }
+  handleUpdateUsername (value) {
+    const newUsername = (value) ? value : "Anonymous";
+    const oldUsername = this.state.currentUser.name;
+    // Set the current user name
+    this.setState( {currentUser: {name: newUsername}} );
+    const updateObj = {
+      type: "postUsernameChangeNotification",
+      oldName: oldUsername,
+      newName: newUsername
+    };
+    // notify all
+    this.websocket.send(JSON.stringify(updateObj));
   }
 
   usernameNotification (usernameChange) {
-    this.setState( {notifications: {oldName: usernameChange.oldName, newName: usernameChange.newName}} );
+    this.setState( {messages: this.state.messages.concat(usernameChange)}  );
   }
 
   messageNotification (messageChange) {
@@ -59,10 +52,6 @@ class App extends Component {
 
   componentDidMount () {
     this.websocket = new WebSocket("ws://localhost:3001");
-
-    this.websocket.onopen = (ws) => {
-      console.log("Opened Connection");
-    };
 
     this.websocket.onmessage = (message) => {
       const messageObj = JSON.parse(message.data);

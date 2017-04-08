@@ -5,7 +5,12 @@ const uuid = require('uuid/v1');
 
  
 function checkImgUrl(content) {
-  return (content.includes(".jpg") || content.includes(".png") || content.includes(".gif"));
+  return (
+    content.includes(".jpg") || 
+    content.includes(".png") || 
+    content.includes(".gif") ||
+    content.includes(".jpeg")
+  );
 }
 
 function broadcastUserCount() {
@@ -50,10 +55,9 @@ wss.on('connection', (ws) => {
         broadcastObj.content = messageObj.content;
       }
     }
-    if(messageObj.type === "postNotification") {
+    if(messageObj.type === "postUsernameChangeNotification") {
       broadcastObj.type = "incomingNotification";
-      broadcastObj.oldName = messageObj.oldName;
-      broadcastObj.newName = messageObj.newName;
+      broadcastObj.content = `${messageObj.oldName} changed their name to ${messageObj.newName}`;
     }
 
     wss.broadcast(broadcastObj);
